@@ -1,0 +1,39 @@
+Stars Tech — static deploy on Amazon EC2 (Ubuntu example)
+===============================================================
+
+1) Build locally (or on the instance)
+   npm install
+   npm run build
+
+   Output folder: dist/
+
+2) Copy dist/ to the server (from your PC), for example:
+   scp -r dist/* ubuntu@YOUR_EC2_PUBLIC_DNS:/var/www/stackstars/
+
+3) Install nginx on EC2
+   sudo apt update && sudo apt install -y nginx
+
+4) Point nginx at the built files. Example site config:
+   sudo nano /etc/nginx/sites-available/stackstars
+
+   server {
+     listen 80;
+     server_name your-domain.com;
+     root /var/www/stackstars;
+     index index.html;
+     location / {
+       try_files $uri $uri/ /index.html;
+     }
+   }
+
+   sudo ln -s /etc/nginx/sites-available/stackstars /etc/nginx/sites-enabled/
+   sudo nginx -t && sudo systemctl reload nginx
+
+5) HTTPS (recommended): install Certbot for Let's Encrypt and follow its nginx plugin steps.
+
+6) Security group: allow inbound TCP 80 (and 443 after TLS) from the internet.
+
+Notes
+-----
+- This is a single-page marketing site; "try_files ... /index.html" keeps deep links working if you add routing later.
+- Set your real inbox in COMPANY_EMAIL at the top of src/App.tsx before going live.
